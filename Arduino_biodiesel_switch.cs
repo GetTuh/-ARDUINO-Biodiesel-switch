@@ -57,7 +57,7 @@ void menu(){
   if(pozycjagalki()>-1&&pozycjagalki()<4){lcd.print("  Temp. zmiany");choice=0;}
   else if(pozycjagalki()>3&&pozycjagalki()<8){lcd.print("Roznica otwarcia");choice=1;}
   else if(pozycjagalki()>7&&pozycjagalki()<12){lcd.print("Opoznienie otw.");choice=2;}
-  else if(pozycjagalki()>11&&pozycjagalki()<16){lcd.print("Zaprezetuj chuja");choice=3;}
+  else if(pozycjagalki()>11&&pozycjagalki()<16){lcd.print("Zaprezetuj ");choice=3;}
   }
   jednorazowy=pozycjagalki();
 }
