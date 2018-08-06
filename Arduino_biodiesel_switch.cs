@@ -1,266 +1,91 @@
-
 #include <LiquidCrystal.h>
-
-byte stopni[8] = {
-    0b00110,
-    0b01001,
-    0b01001,
-    0b00110,
-    0b00000,
-    0b00000,
-    0b00000,
-    0b00000
-};
-
-byte ch1[8] = {
-  B00111,
-  B01000,
-  B10010,
-  B10000,
-  B10100,
-  B10010,
-  B01000,
-  B00111
-};
+#include <EEPROM.h>
+int switchtemp = EEPROM.read(1); //temperatura zmiany w stopniach C                                                 eeprom 1
+int switchtime = EEPROM.read(2); //różnica pomiędzy otwarciem powrotu do zbiornika z ropą a otwarciem wlotu ropy    eeprom 2
+int switchdelay = EEPROM.read(3); //opóźnienie między przełączaniem                                                 eeprom 3
+int dispfreq = 15;
+  int i;
+int menuu=1;
 
 
-byte ch2[8] = {
-  B00000,
-  B11111,
-  B00000,
-  B00100,
-  B00001,
-  B01000,
-  B11111,
-  B00000
-};
-byte ch3[8] = {
-  B00000,
-  B11111,
-  B00000,
-  B01000,
-  B00000,
-  B00001,
-  B11111,
-  B00000
-};
-
-byte ch4[8] = {
-  B00000,
-  B10000,
-  B01100,
-  B01010,
-  B01001,
-  B01010,
-  B11100,
-  B00000
-};
-
-byte c[8] = {
-  B00010,
-  B00100,
-  B00000,
-  B01111,
-  B10000,
-  B10000,
-  B01111,
-  B00000
-};
-
-byte ch5[8] = {
-B01100,  
-B10010,  
-B01001,  
-B00101,  
-B00001,  
-B01001,  
-B10010,  
-B01100 
-
-};
-byte ch6[8] = {
-B00000,  
-B00111,  
-B01010,  
-B10010,  
-B01010,  
-B00100,  
-B00011,  
-B00000
-};
-
-
-
+int jednorazowy=-1;
+int dwurazowy;
+int choice;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-int temp;
-int ontemp=70;
-int err;
-bool sw1;
-bool sw2;
-bool ros;
-bool ch=true;
-bool res=false;
+
 void setup() {
-  lcd.createChar(0, stopni);
-  lcd.createChar(1, ch1);
-    lcd.createChar(2, ch2);
-  lcd.createChar(3, ch3);
-     lcd.createChar(4, ch4);
-  lcd.createChar(5, c);
-  lcd.createChar(6, ch5);
-  lcd.createChar(7, ch6);
   lcd.begin(16, 2);
-  pinMode(6, INPUT);
-  pinMode(7,INPUT);
-  pinMode(8,OUTPUT);
-  
+  defaulty();
+   pinMode(9, INPUT);
+   charsy();
+}
+void charsy(){
+  uint8_t fullb[8] = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}; 
+lcd.createChar(0, fullb);
+}
+void defaulty(){
+// wczytanie defaultów jeżeli jakieś wartości nie były zapisane w pamięci EEPROM
+  if (switchtemp==0)switchtemp=70;
+  if(switchtime==0)switchtime=5;
+  if(switchdelay==0)switchdelay=3;
+  i = dispfreq;
 }
 
 
-void drawch(){
-    
-  lcd.write(byte(1));
-    lcd.write(byte(2));
-    lcd.write(byte(3));
-    lcd.write(byte(4));
-  
-  lcd.print("    ");
-  
-  lcd.print("JKP   ");
-  
-  lcd.print("     ");
-    lcd.write(byte(7));
-    lcd.write(byte(3));
-    lcd.write(byte(2));
-    lcd.write(byte(6));
-
-}
 
 void loop() {
+  if(menuu==1){
+    //menu();
+    rysujinfo();
+  }
+else if(i==0){
+ // rysujinfo();
+  i=dispfreq;
+}
+else{i--;}
+  
+  delay(50);
+ }
+ 
+void menu(){
+  if(pozycjagalki()!=jednorazowy||jednorazowy==-1){
+
+  lcd.clear();
+  lcd.setCursor(pozycjagalki(), 0);
+ lcd.print((char)0);
+  lcd.setCursor(0,1);
+  if(pozycjagalki()>-1&&pozycjagalki()<4){lcd.print("  Temp. zmiany");choice=0;}
+  else if(pozycjagalki()>3&&pozycjagalki()<8){lcd.print("Roznica otwarcia");choice=1;}
+  else if(pozycjagalki()>7&&pozycjagalki()<12){lcd.print("Opoznienie otw.");choice=2;}
+  else if(pozycjagalki()>11&&pozycjagalki()<16){lcd.print("Zaprezetuj chuja");choice=3;}
+  }
+  jednorazowy=pozycjagalki();
+}
+float pozycjagalki(){
+  return (15+(-1*(((analogRead(0))/4)/16)));
+}
 
 
-    err=0;
-lcd.setCursor(0, 0);
-sw1=digitalRead(6);
-sw2=digitalRead(7);
+void rysujinfo(){
+  int temp = (int)fatemp();
+  if(temp!=dwurazowy){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(temp);
+  
+  }
+  dwurazowy=(temp);
 
-
-
-int reading = analogRead(5);
+}
+float fatemp(){
+  int reading = analogRead(5);
 float voltage = reading * 5.0;
 voltage /= 1024.0; 
-float temp = (voltage - 0.5) * 100 ; 
+return ((voltage - 0.5) * 100) ; 
+}
 
- lcd.print("TRYB:");
-  if(sw1==true){
-    lcd.print("AUTO");
-    if(temp>ontemp||res==true){
-        ros=true;
-        res=true;
-        err=0;
-    }
-    else{
-        ros=false;
-        err=1;
-    }
-  }
-  if(sw1==false){
-    lcd.print("Wymusz.");
-    err=2;
-   if(sw2==true){
-    ros=false;
+void czysceeprom(){
+   for (int i = 0 ; i < EEPROM.length() ; i++) {
+    EEPROM.write(i, 0);
    }
-   if(sw2==false){
-    ros=true;
-   }
-  }
-
-
-
-  lcd.setCursor(14,0);
-if(ros==true){ 
-    lcd.print("OR");
-    //elektrozawory przełączają się na olej roślinny
-  digitalWrite(8,HIGH);
 }
-if(ros==false) {
-    lcd.print("ON");
-    //elektrozawory przełączają sie na olej napędowy
-  digitalWrite(8,LOW);
-}
-lcd.setCursor(0,1);
-  switch(err){
-    case 1:lcd.print("Nisk. Temp"); break;
-    case 2:lcd.print("Tryb recz.");break;
-    case 0:lcd.print("Praca");break;
-}
-  
-
-
-
-  if(temp>100){
-     lcd.setCursor(11,2);
-lcd.print((int)temp);
-lcd.write(byte(0));
-lcd.print("C");
-  }
-  else if(temp>9){
-    lcd.setCursor(12,2);
-lcd.print((int)temp);
-lcd.write(byte(0));
-lcd.print("C");
-  }  else if(temp>-1){
-    lcd.setCursor(13,2);
-lcd.print((int)temp);
-lcd.write(byte(0));
-lcd.print("C");
-  }
-  else if(temp>-10){
-        lcd.setCursor(12,2);
-lcd.print((int)temp);
-lcd.write(byte(0));
-lcd.print("C");
-  }else{
-       lcd.setCursor(11,2);
-lcd.print((int)temp);
-lcd.write(byte(0));
-lcd.print("C");
-  }
-  delay(750);
-  lcd.clear();
-
-
-if(ch==true){
-      lcd.clear();
-    int w=0;
-  bool x=false;
-    while(w>-1){
-        lcd.setCursor(w,0);
-    drawch();
-      lcd.setCursor(w,1);
-      lcd.print("Kurczy");
-      lcd.write(byte(5));
-      lcd.print(" Koncerny Paliwowe");
-    delay(250);
-      if(x==false){delay(750);x=true;}
-
-    w--;
-      if(w>-1){
-        lcd.clear();
-      }
-    }
-  w=7;
-  while(w>0){
-    lcd.scrollDisplayLeft();
-    delay(250);
-    w--;
-  }
-  delay(750);
-    ch=false;
-  lcd.clear();
-}
-
-
-
-}
-
