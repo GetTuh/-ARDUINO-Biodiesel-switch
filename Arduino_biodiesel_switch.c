@@ -93,7 +93,7 @@ B00000
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 int temp;
-int ontemp=70;
+int ontemp=69;
 int err;
 bool sw1;
 bool sw2;
