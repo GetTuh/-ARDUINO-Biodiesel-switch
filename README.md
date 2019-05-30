@@ -13,3 +13,4 @@ Since diesel efficiency usually floats around 35%, in a car that has 80hp which 
 
 
 This code is used for arduino to turn on and off solenoid valves according to the values from the thermometer. It's configurable in car with 2 switches and a potentiometer.The data is displayed on 16x2 screen, and all the values can be saved to a arduino's non-volatile eeprom memory.
+<!-------
