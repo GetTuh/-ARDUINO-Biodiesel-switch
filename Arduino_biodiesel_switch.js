@@ -185,7 +185,7 @@ if(ros==true){
 }
 if(ros==false) {
     lcd.print("ON");
-    //elektrozawory przełączają sie na olej napędowy
+    //elektrozawory przełączają sie na olej napedowy
   digitalWrite(8,LOW);
 }
 lcd.setCursor(0,1);
